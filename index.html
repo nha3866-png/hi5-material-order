@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<title>HI5 재료주문</title>
+<style>
+:root{--ink:#172033;--muted:#737b8c;--line:#e4e8ef;--brand:#d85659;--soft:#fff1f1;--bg:#f7f8fb;--warn:#fff7df;--warnline:#efcf73}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif}button,input,select{font:inherit}main{max-width:720px;margin:auto;padding:14px 12px 38px}.head{padding:8px 2px 14px}.head h1{margin:0;font-size:24px}.head p{margin:5px 0 0;color:var(--muted);font-size:13px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:13px}.step{font-size:18px;font-weight:900;margin-bottom:12px}
+/* no-JS native tab controls */
+.ctrl{position:absolute;opacity:0;pointer-events:none}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:9px}.tabs label{min-height:52px;border:1px solid var(--line);border-radius:14px;display:grid;place-items:center;font-weight:900;color:#677084;background:#f8f9fb;cursor:pointer}#majorDesign:checked ~ .shell .major-design,#majorAni:checked ~ .shell .major-ani,#sheetMaterial:checked ~ .shell .sheet-material,#sheetPaint:checked ~ .shell .sheet-paint{background:var(--ink);color:#fff;border-color:var(--ink)}
+.fields{display:grid;gap:10px}.field label{display:block;font-size:13px;font-weight:850;margin-bottom:6px}.field input,.field select,.search{width:100%;min-height:50px;border:1px solid #d7dde7;border-radius:13px;background:#fff;padding:0 13px;font-size:16px}
+.product-section{display:none}#sheetMaterial:checked ~ .shell .materials{display:block}#sheetPaint:checked ~ .shell #majorDesign ~ *{}
+#majorDesign:checked ~ #sheetPaint:checked ~ .shell .design-paints{display:block}#majorAni:checked ~ #sheetPaint:checked ~ .shell .ani-paints{display:block}
+.search{margin:11px 0}.list{border:1px solid var(--line);border-radius:15px;overflow:hidden}.prod{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--line)}.prod:last-child{border-bottom:0}.name{font-weight:900;line-height:1.35}.meta{font-size:12px;color:var(--muted);margin-top:4px}.price{font-weight:900;margin-top:6px}.direct{display:inline-block;font-size:11px;color:#93620a;background:#fff0cd;border-radius:7px;padding:3px 6px;margin-left:6px;vertical-align:2px}.qtylabel{display:grid;gap:5px;justify-items:center;font-size:11px;color:var(--muted)}.qtyselect{min-width:64px;height:48px;border:1px solid #e8c2c3;background:var(--soft);color:#a33d41;border-radius:13px;text-align:center;font-size:17px;font-weight:900}.variantwrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.variantselect,.variantinput{height:42px;border:1px solid #d7dde7;border-radius:11px;background:#fff;padding:0 10px;font-size:15px;color:var(--ink)}.variantselect{min-width:120px}.variantinput{width:120px}.req{font-size:11px;color:#a33d41;font-weight:800}.prod.hasvariant{align-items:start}.prod.hasvariant .qtylabel{padding-top:3px}
+.notice{padding:13px;border:1px solid var(--warnline);background:var(--warn);color:#755e1b;border-radius:13px;line-height:1.55;font-size:13px}.notice.strong{background:#fff0f0;border:2px solid #edb0b2;color:#a2393c;font-weight:850;margin-top:10px}.summary{display:flex;justify-content:space-between;align-items:center;padding:13px 0;font-weight:900}.summary strong{font-size:27px;color:var(--brand)}.primary{width:100%;min-height:56px;border:0;border-radius:15px;background:var(--brand);color:white;font-weight:900;font-size:17px}.receipt{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:13px}.rrow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}.muted{color:var(--muted);font-size:12px}.compat{font-size:12px;color:#7b631e;background:#fff8e6;border:1px solid #f1d789;padding:10px 12px;border-radius:12px;margin-bottom:12px}
+@media(min-width:640px){.fields{grid-template-columns:1fr 1fr 1.2fr}}
+</style>
+<style>
+@media (max-width: 600px) {
+  input, select, button, textarea {
+    font-size: 16px !important;
+  }
+  select, button, input[type="number"], input[type="text"], input[type="tel"] {
+    min-height: 44px;
+  }
+}
+</style>
+<style>
+.name.allinone { color:#2563eb !important; font-weight:800; }
+.prod.allinone-card { border:1px solid #bfdbfe; background:#eff6ff; }
+</style>
+<style>
+#completeView{display:none;max-width:720px;margin:0 auto;padding:16px 12px 42px}
+.complete-hero{background:#fff;border:1px solid #e4e8ef;border-radius:20px;padding:22px 18px;margin-bottom:14px;text-align:center}
+.complete-icon{width:58px;height:58px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:#eaf8ef;color:#258348;font-size:30px;font-weight:900}
+.complete-hero h2{margin:0 0 8px;font-size:24px}
+.complete-hero p{margin:0;color:#5d6574;line-height:1.65;font-size:14px}
+.complete-card{background:#fff;border:1px solid #e4e8ef;border-radius:18px;padding:16px;margin-bottom:13px}
+.complete-title{font-size:18px;font-weight:900;margin-bottom:12px}
+.complete-info{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e4e8ef;border-radius:13px;overflow:hidden}
+.complete-info div{padding:10px 12px;border-bottom:1px solid #e4e8ef;min-width:0}
+.complete-info div:nth-child(odd){border-right:1px solid #e4e8ef}
+.complete-info div:nth-last-child(-n+2){border-bottom:0}
+.complete-info small{display:block;color:#737b8c;font-size:11px;margin-bottom:4px}
+.complete-info b{font-size:14px;word-break:break-all}
+.order-table-wrap{overflow-x:auto;border:1px solid #e4e8ef;border-radius:13px}
+.order-table{width:100%;border-collapse:collapse;min-width:540px;font-size:13px}
+.order-table th,.order-table td{padding:11px 10px;border-bottom:1px solid #e4e8ef;text-align:left;vertical-align:top}
+.order-table th{background:#f7f8fb;font-weight:900;white-space:nowrap}
+.order-table tr:last-child td{border-bottom:0}
+.order-table .num{text-align:center;white-space:nowrap}
+.order-table .money{text-align:right;white-space:nowrap;font-weight:800}
+.complete-total{display:flex;justify-content:space-between;align-items:center;padding:16px 2px 4px;font-weight:900}
+.complete-total strong{font-size:27px;color:#d85659}
+.complete-note{margin-top:12px;padding:13px 14px;border:1px solid #f0c6c7;background:#fff1f1;border-radius:13px;color:#9f3d40;font-size:13px;line-height:1.6;font-weight:800}
+@media(max-width:520px){
+  .complete-info{grid-template-columns:1fr}
+  .complete-info div:nth-child(odd){border-right:0}
+  .complete-info div:nth-last-child(-n+2){border-bottom:1px solid #e4e8ef}
+  .complete-info div:last-child{border-bottom:0}
+}
+</style>
+
+
+<style>
+html,body{max-width:100%;overflow-x:hidden}input,select,button,textarea{font-size:16px}select,button,input{min-height:44px}@media(max-width:600px){.shell{width:100%!important;max-width:100%!important;margin:0!important}.prod{min-width:0}.order-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
+</style>
+
+</head>
+<body>
+<input checked="" class="ctrl" id="majorDesign" name="major" type="radio"/>
+<input class="ctrl" id="majorAni" name="major" type="radio"/>
+<input checked="" class="ctrl" id="sheetMaterial" name="sheet" type="radio"/>
+<input class="ctrl" id="sheetPaint" name="sheet" type="radio"/>
+<div class="shell"><main>
+<div class="head"><h1>HI5 재료주문</h1><p>아이폰·안드로이드 모바일 주문</p></div>
+<div class="compat">수량을 선택하면 아래 <b>4. 주문 확인</b>에 즉시 반영됩니다. 종류가 있는 품목은 <b>종류 선택</b> 후 수량을 선택해 주세요.</div>
+<section class="card"><div class="step">1. 주문반 선택</div><div class="tabs"><label class="major-design" for="majorDesign">🎨 디자인반</label><label class="major-ani" for="majorAni">✏️ 애니반</label></div></section>
+<section class="card"><div class="step">2. 주문자 정보</div><div class="fields"><div class="field"><label>반명</label><select aria-label="종류 또는 수량 선택" id="className"><option value="">선택</option><option>S</option><option>Y</option><option>J</option><option>상</option><option>칸</option></select></div><div class="field"><label>학생 이름</label><input id="studentName" placeholder="예: 김만기"/></div><div class="field"><label>휴대폰번호</label><input id="phone" inputmode="numeric" placeholder="010-1234-5678"/></div></div></section>
+<section class="card"><div class="step">3. 품목 선택</div><div class="tabs"><label class="sheet-material" for="sheetMaterial">미술재료</label><label class="sheet-paint" for="sheetPaint">물감재료</label></div><input class="search" id="search" placeholder="품목명을 검색하세요"/>
+<div class="product-section materials"><div class="list"><div class="prod" data-name="포스터칼라 화이트(250ml) - 신한 EA">
+<div class="ptext"><div class="name">포스터칼라 화이트(250ml) - 신한</div><div class="meta">EA</div><div class="price">12,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M01" data-name="포스터칼라 화이트(250ml) - 신한" data-price="12000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="전문가용 튜브형 블랙(100ml) - 신한 EA">
+<div class="ptext"><div class="name">전문가용 튜브형 블랙(100ml) - 신한</div><div class="meta">EA</div><div class="price">9,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M02" data-name="전문가용 튜브형 블랙(100ml) - 신한" data-price="9000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="매트화이트(100ml) - 미션 EA">
+<div class="ptext"><div class="name">매트화이트(100ml) - 미션</div><div class="meta">EA</div><div class="price">11,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M03" data-name="매트화이트(100ml) - 미션" data-price="11000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="아이스트레이 EA">
+<div class="ptext"><div class="name">아이스트레이</div><div class="meta">EA</div><div class="price">6,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M04" data-name="아이스트레이" data-price="6000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="아크릴판 EA">
+<div class="ptext"><div class="name">아크릴판</div><div class="meta">EA</div><div class="price">1,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M05" data-name="아크릴판" data-price="1300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="4절 속(100장)">
+<div class="ptext"><div class="name">4절</div><div class="meta">속(100장) · 직접수령</div><div class="price">22,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M06" data-name="4절" data-price="22000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="3절 속(100장)">
+<div class="ptext"><div class="name">3절</div><div class="meta">속(100장) · 직접수령</div><div class="price">33,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M07" data-name="3절" data-price="33000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="프리즈마 유성색연필 72색 SET">
+<div class="ptext"><div class="name">프리즈마 유성색연필 72색</div><div class="meta">SET</div><div class="price">120,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M08" data-name="프리즈마 유성색연필 72색" data-price="120000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="프리즈마 유성색연필 132색 SET">
+<div class="ptext"><div class="name">프리즈마 유성색연필 132색</div><div class="meta">SET</div><div class="price">218,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M09" data-name="프리즈마 유성색연필 132색" data-price="218000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod hasvariant" data-name="스테들러 연필 타(12자루) HB 2B 4B 2H 6B">
+<div class="ptext"><div class="name">스테들러 연필</div><div class="meta">타(12자루) · 종류 선택 <span class="req">필수</span></div><div class="price">14,000원</div><div class="variantwrap"><select aria-label="종류 선택" class="variantselect" data-for="M10" onchange="updateOrder()"><option value="">종류 선택</option><option>HB</option><option>2B</option><option>4B</option><option>2H</option><option>6B</option></select></div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M10" data-name="스테들러 연필" data-price="14000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod hasvariant" data-name="톰보우 연필 타(12자루) HB 2B 4B 2H">
+<div class="ptext"><div class="name">톰보우 연필</div><div class="meta">타(12자루) · 종류 선택 <span class="req">필수</span></div><div class="price">12,000원</div><div class="variantwrap"><select aria-label="종류 선택" class="variantselect" data-for="M11" onchange="updateOrder()"><option value="">종류 선택</option><option>HB</option><option>2B</option><option>4B</option><option>2H</option></select></div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M11" data-name="톰보우 연필" data-price="12000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="ELM 전동연필깎이 V-3 EA">
+<div class="ptext"><div class="name">ELM 전동연필깎이 V-3</div><div class="meta">EA</div><div class="price">18,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M12" data-name="ELM 전동연필깎이 V-3" data-price="18000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod hasvariant" data-name="아트라이너 EA" style="display:block;">
+  <div class="ptext">
+    <div class="name">아트라이너</div>
+    <div class="meta">EA · 종류 선택 <span class="req">필수</span> · 여러 종류 동시 주문 가능</div>
+    <div class="price">3,000원 / 개</div>
+    <div style="margin-top:8px;padding:9px 10px;border-radius:10px;background:#f5f8ff;color:#47648f;font-size:12px;line-height:1.5;">
+      예) 블랙 0.3mm 1개 + 블랙 0.8mm 1개처럼 각각 선택할 수 있습니다.
+    </div>
+    
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:8px;align-items:end;margin-top:8px;">
+  <label style="display:grid;gap:4px;font-size:11px;color:#7a8290;">
+    <span>첫 번째 종류</span>
+    <select aria-label="아트라이너 첫 번째 종류 선택" class="variantselect" data-for="M13_1" onchange="updateOrder()" style="width:100%;">
+      <option value="">종류 선택</option><option value="블랙 0.05mm">블랙 0.05mm</option><option value="블랙 0.1mm">블랙 0.1mm</option><option value="블랙 0.2mm">블랙 0.2mm</option><option value="블랙 0.3mm">블랙 0.3mm</option><option value="블랙 0.4mm">블랙 0.4mm</option><option value="블랙 0.5mm">블랙 0.5mm</option><option value="블랙 0.6mm">블랙 0.6mm</option><option value="블랙 0.7mm">블랙 0.7mm</option><option value="블랙 0.8mm">블랙 0.8mm</option>
+    </select>
+  </label>
+  <label class="qtylabel">
+    <span>수량</span>
+    <select aria-label="아트라이너 첫 번째 수량 선택" class="qtyselect" data-id="M13_1" data-name="아트라이너" data-price="3000" onchange="updateOrder()">
+      <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+    </select>
+  </label>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:8px;align-items:end;margin-top:8px;">
+  <label style="display:grid;gap:4px;font-size:11px;color:#7a8290;">
+    <span>추가 1 종류</span>
+    <select aria-label="아트라이너 추가 1 종류 선택" class="variantselect" data-for="M13_2" onchange="updateOrder()" style="width:100%;">
+      <option value="">종류 선택</option><option value="블랙 0.05mm">블랙 0.05mm</option><option value="블랙 0.1mm">블랙 0.1mm</option><option value="블랙 0.2mm">블랙 0.2mm</option><option value="블랙 0.3mm">블랙 0.3mm</option><option value="블랙 0.4mm">블랙 0.4mm</option><option value="블랙 0.5mm">블랙 0.5mm</option><option value="블랙 0.6mm">블랙 0.6mm</option><option value="블랙 0.7mm">블랙 0.7mm</option><option value="블랙 0.8mm">블랙 0.8mm</option>
+    </select>
+  </label>
+  <label class="qtylabel">
+    <span>수량</span>
+    <select aria-label="아트라이너 추가 1 수량 선택" class="qtyselect" data-id="M13_2" data-name="아트라이너" data-price="3000" onchange="updateOrder()">
+      <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+    </select>
+  </label>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:8px;align-items:end;margin-top:8px;">
+  <label style="display:grid;gap:4px;font-size:11px;color:#7a8290;">
+    <span>추가 2 종류</span>
+    <select aria-label="아트라이너 추가 2 종류 선택" class="variantselect" data-for="M13_3" onchange="updateOrder()" style="width:100%;">
+      <option value="">종류 선택</option><option value="블랙 0.05mm">블랙 0.05mm</option><option value="블랙 0.1mm">블랙 0.1mm</option><option value="블랙 0.2mm">블랙 0.2mm</option><option value="블랙 0.3mm">블랙 0.3mm</option><option value="블랙 0.4mm">블랙 0.4mm</option><option value="블랙 0.5mm">블랙 0.5mm</option><option value="블랙 0.6mm">블랙 0.6mm</option><option value="블랙 0.7mm">블랙 0.7mm</option><option value="블랙 0.8mm">블랙 0.8mm</option>
+    </select>
+  </label>
+  <label class="qtylabel">
+    <span>수량</span>
+    <select aria-label="아트라이너 추가 2 수량 선택" class="qtyselect" data-id="M13_3" data-name="아트라이너" data-price="3000" onchange="updateOrder()">
+      <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+    </select>
+  </label>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:8px;align-items:end;margin-top:8px;">
+  <label style="display:grid;gap:4px;font-size:11px;color:#7a8290;">
+    <span>추가 3 종류</span>
+    <select aria-label="아트라이너 추가 3 종류 선택" class="variantselect" data-for="M13_4" onchange="updateOrder()" style="width:100%;">
+      <option value="">종류 선택</option><option value="블랙 0.05mm">블랙 0.05mm</option><option value="블랙 0.1mm">블랙 0.1mm</option><option value="블랙 0.2mm">블랙 0.2mm</option><option value="블랙 0.3mm">블랙 0.3mm</option><option value="블랙 0.4mm">블랙 0.4mm</option><option value="블랙 0.5mm">블랙 0.5mm</option><option value="블랙 0.6mm">블랙 0.6mm</option><option value="블랙 0.7mm">블랙 0.7mm</option><option value="블랙 0.8mm">블랙 0.8mm</option>
+    </select>
+  </label>
+  <label class="qtylabel">
+    <span>수량</span>
+    <select aria-label="아트라이너 추가 3 수량 선택" class="qtyselect" data-id="M13_4" data-name="아트라이너" data-price="3000" onchange="updateOrder()">
+      <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+    </select>
+  </label>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:8px;align-items:end;margin-top:8px;">
+  <label style="display:grid;gap:4px;font-size:11px;color:#7a8290;">
+    <span>추가 4 종류</span>
+    <select aria-label="아트라이너 추가 4 종류 선택" class="variantselect" data-for="M13_5" onchange="updateOrder()" style="width:100%;">
+      <option value="">종류 선택</option><option value="블랙 0.05mm">블랙 0.05mm</option><option value="블랙 0.1mm">블랙 0.1mm</option><option value="블랙 0.2mm">블랙 0.2mm</option><option value="블랙 0.3mm">블랙 0.3mm</option><option value="블랙 0.4mm">블랙 0.4mm</option><option value="블랙 0.5mm">블랙 0.5mm</option><option value="블랙 0.6mm">블랙 0.6mm</option><option value="블랙 0.7mm">블랙 0.7mm</option><option value="블랙 0.8mm">블랙 0.8mm</option>
+    </select>
+  </label>
+  <label class="qtylabel">
+    <span>수량</span>
+    <select aria-label="아트라이너 추가 4 수량 선택" class="qtyselect" data-id="M13_5" data-name="아트라이너" data-price="3000" onchange="updateOrder()">
+      <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+    </select>
+  </label>
+</div>
+  </div>
+</div>
+<div class="prod" data-name="펜텔 브러쉬 펜 EA">
+<div class="ptext"><div class="name">펜텔 브러쉬 펜</div><div class="meta">EA</div><div class="price">14,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M14" data-name="펜텔 브러쉬 펜" data-price="14000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="펜텔 포켓브러쉬펜 리필심 EA">
+<div class="ptext"><div class="name">펜텔 포켓브러쉬펜 리필심</div><div class="meta">EA</div><div class="price">5,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M15" data-name="펜텔 포켓브러쉬펜 리필심" data-price="5500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod hasvariant" data-name="마카 그레이 세트 SET 쿨그레이 웜그레이">
+<div class="ptext"><div class="name">마카 그레이 세트</div><div class="meta">SET · 종류 선택 <span class="req">필수</span></div><div class="price">38,000원</div><div class="variantwrap"><select aria-label="종류 선택" class="variantselect" data-for="M16" onchange="updateOrder()"><option value="">종류 선택</option><option>쿨그레이</option><option>웜그레이</option></select></div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M16" data-name="마카 그레이 세트" data-price="38000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍지우개(분홍색) 줄(10개)">
+<div class="ptext"><div class="name">화홍지우개(분홍색)</div><div class="meta">줄(10개)</div><div class="price">3,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M17" data-name="화홍지우개(분홍색)" data-price="3000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍 구성붓 972-3호 자루">
+<div class="ptext"><div class="name">화홍 구성붓 972-3호</div><div class="meta">자루</div><div class="price">3,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M18" data-name="화홍 구성붓 972-3호" data-price="3000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍 구성붓 972-4호 자루">
+<div class="ptext"><div class="name">화홍 구성붓 972-4호</div><div class="meta">자루</div><div class="price">3,600원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M19" data-name="화홍 구성붓 972-4호" data-price="3600" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍 구성붓 972-5호 자루">
+<div class="ptext"><div class="name">화홍 구성붓 972-5호</div><div class="meta">자루</div><div class="price">4,200원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M20" data-name="화홍 구성붓 972-5호" data-price="4200" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍 구성붓 972-6호 자루">
+<div class="ptext"><div class="name">화홍 구성붓 972-6호</div><div class="meta">자루</div><div class="price">5,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M21" data-name="화홍 구성붓 972-6호" data-price="5000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍 구성붓 972-7호 자루">
+<div class="ptext"><div class="name">화홍 구성붓 972-7호</div><div class="meta">자루</div><div class="price">6,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M22" data-name="화홍 구성붓 972-7호" data-price="6000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍 구성붓 972-8호 자루">
+<div class="ptext"><div class="name">화홍 구성붓 972-8호</div><div class="meta">자루</div><div class="price">7,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M23" data-name="화홍 구성붓 972-8호" data-price="7500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="화홍 세필붓 320-4호 자루">
+<div class="ptext"><div class="name">화홍 세필붓 320-4호</div><div class="meta">자루</div><div class="price">2,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M24" data-name="화홍 세필붓 320-4호" data-price="2500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="바바라 80R-8호 자루">
+<div class="ptext"><div class="name">바바라 80R-8호</div><div class="meta">자루</div><div class="price">6,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M25" data-name="바바라 80R-8호" data-price="6000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="바바라 300R-8호 자루">
+<div class="ptext"><div class="name">바바라 300R-8호</div><div class="meta">자루</div><div class="price">11,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M26" data-name="바바라 300R-8호" data-price="11000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="바바라 300R-12호 자루">
+<div class="ptext"><div class="name">바바라 300R-12호</div><div class="meta">자루</div><div class="price">13,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M27" data-name="바바라 300R-12호" data-price="13000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div></div></div>
+<div class="product-section design-paints"><div class="list"><div class="prod allinone-card" data-name="디자인 올인원 물감세트 디자인 세트 ">
+<div class="ptext"><div class="name allinone">디자인 올인원 물감세트</div><div class="meta">디자인 세트</div><div class="price">272,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DESIGN_SET_ALL" data-name="디자인 올인원 물감세트" data-price="272000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="802 알리자린크림슨 패스 b">
+<div class="ptext"><div class="name">802 알리자린크림슨</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP8" data-name="802 알리자린크림슨" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="804 카민 패스 b">
+<div class="ptext"><div class="name">804 카민</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP9" data-name="804 카민" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="811 오렌지 패스 b">
+<div class="ptext"><div class="name">811 오렌지</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP10" data-name="811 오렌지" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="813 옐로우오렌지 패스 b">
+<div class="ptext"><div class="name">813 옐로우오렌지</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP11" data-name="813 옐로우오렌지" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="815 퍼머넌트옐로딥 패스 b">
+<div class="ptext"><div class="name">815 퍼머넌트옐로딥</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP12" data-name="815 퍼머넌트옐로딥" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="816 퍼머넌트옐로 패스 b">
+<div class="ptext"><div class="name">816 퍼머넌트옐로</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP13" data-name="816 퍼머넌트옐로" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="817 레몬옐로 패스 b">
+<div class="ptext"><div class="name">817 레몬옐로</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP14" data-name="817 레몬옐로" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="819 쟌브릴리언트 패스 b">
+<div class="ptext"><div class="name">819 쟌브릴리언트</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP15" data-name="819 쟌브릴리언트" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="821 린덴그린 패스 b">
+<div class="ptext"><div class="name">821 린덴그린</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP16" data-name="821 린덴그린" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="827 코발트그린 패스 e">
+<div class="ptext"><div class="name">827 코발트그린</div><div class="meta">패스 · E등급</div><div class="price">9,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP17" data-name="827 코발트그린" data-price="9000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="829 샙그린 패스 c">
+<div class="ptext"><div class="name">829 샙그린</div><div class="meta">패스 · C등급</div><div class="price">4,600원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP18" data-name="829 샙그린" data-price="4600" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="830 후커스그린 패스 b">
+<div class="ptext"><div class="name">830 후커스그린</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP19" data-name="830 후커스그린" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="834 섀도그린 패스 d">
+<div class="ptext"><div class="name">834 섀도그린</div><div class="meta">패스 · D등급</div><div class="price">5,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP20" data-name="834 섀도그린" data-price="5800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="841 컴포우즈블루 패스 a">
+<div class="ptext"><div class="name">841 컴포우즈블루</div><div class="meta">패스 · A등급</div><div class="price">3,400원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP21" data-name="841 컴포우즈블루" data-price="3400" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="844 피코블루 패스 b">
+<div class="ptext"><div class="name">844 피코블루</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP22" data-name="844 피코블루" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="845 세루리안블루휴 패스 b">
+<div class="ptext"><div class="name">845 세루리안블루휴</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP23" data-name="845 세루리안블루휴" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="847 코발트블루휴 패스 b">
+<div class="ptext"><div class="name">847 코발트블루휴</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP24" data-name="847 코발트블루휴" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="853 인디고 패스 b">
+<div class="ptext"><div class="name">853 인디고</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP25" data-name="853 인디고" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="858 헬리오 패스 a">
+<div class="ptext"><div class="name">858 헬리오</div><div class="meta">패스 · A등급</div><div class="price">3,400원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP26" data-name="858 헬리오" data-price="3400" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="859 블루세레스트 패스 a">
+<div class="ptext"><div class="name">859 블루세레스트</div><div class="meta">패스 · A등급</div><div class="price">3,400원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP27" data-name="859 블루세레스트" data-price="3400" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="861 레드바이올렛 패스 c">
+<div class="ptext"><div class="name">861 레드바이올렛</div><div class="meta">패스 · C등급</div><div class="price">4,600원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP28" data-name="861 레드바이올렛" data-price="4600" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="865 오페라 패스 b">
+<div class="ptext"><div class="name">865 오페라</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP29" data-name="865 오페라" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="870 핑크 패스 b">
+<div class="ptext"><div class="name">870 핑크</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP30" data-name="870 핑크" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="878 옐로오커 패스 a">
+<div class="ptext"><div class="name">878 옐로오커</div><div class="meta">패스 · A등급</div><div class="price">3,400원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP31" data-name="878 옐로오커" data-price="3400" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="882 라이트레드 패스 a">
+<div class="ptext"><div class="name">882 라이트레드</div><div class="meta">패스 · A등급</div><div class="price">3,400원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP32" data-name="882 라이트레드" data-price="3400" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="885 번트시에나 패스 b">
+<div class="ptext"><div class="name">885 번트시에나</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP33" data-name="885 번트시에나" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="887 브라운레드 패스 c">
+<div class="ptext"><div class="name">887 브라운레드</div><div class="meta">패스 · C등급</div><div class="price">4,600원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP34" data-name="887 브라운레드" data-price="4600" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="890 번트엄버 패스 b">
+<div class="ptext"><div class="name">890 번트엄버</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP35" data-name="890 번트엄버" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="892 반다이크브라운 패스 b">
+<div class="ptext"><div class="name">892 반다이크브라운</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP36" data-name="892 반다이크브라운" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="893 세피아 패스 a">
+<div class="ptext"><div class="name">893 세피아</div><div class="meta">패스 · A등급</div><div class="price">3,400원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP37" data-name="893 세피아" data-price="3400" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="849 울트라 마린딥 패스 b">
+<div class="ptext"><div class="name">849 울트라 마린딥</div><div class="meta">패스 · B등급</div><div class="price">3,700원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DP38" data-name="849 울트라 마린딥" data-price="3700" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="18 퍼머넌트오렌지 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">18 퍼머넌트오렌지</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA10" data-name="18 퍼머넌트오렌지" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="24 마젠타 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">24 마젠타</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA11" data-name="24 마젠타" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="28 퍼피레드 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">28 퍼피레드</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA12" data-name="28 퍼피레드" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="33 프러시안블루 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">33 프러시안블루</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA13" data-name="33 프러시안블루" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="34 퍼머넌트모브 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">34 퍼머넌트모브</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA14" data-name="34 퍼머넌트모브" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="37 라이크그린 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">37 라이크그린</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA15" data-name="37 라이크그린" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="40 비리디언 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">40 비리디언</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA16" data-name="40 비리디언" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="41 미들그린 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">41 미들그린</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA17" data-name="41 미들그린" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="61 초콜릿 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">61 초콜릿</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA18" data-name="61 초콜릿" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="70 네이플즈옐로우 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">70 네이플즈옐로우</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA19" data-name="70 네이플즈옐로우" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="83 터키그린 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">83 터키그린</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA20" data-name="83 터키그린" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="84 마린블루 a+ 포스터칼라 a">
+<div class="ptext"><div class="name">84 마린블루</div><div class="meta">A+ 포스터칼라 · A등급</div><div class="price">2,800원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DA21" data-name="84 마린블루" data-price="2800" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w504 데이비스그레이 미션골드 a">
+<div class="ptext"><div class="name">W504 데이비스그레이</div><div class="meta">미션골드 · A등급</div><div class="price">4,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM25" data-name="W504 데이비스그레이" data-price="4000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w531 그리니쉬옐로우no.1 미션골드 c">
+<div class="ptext"><div class="name">W531 그리니쉬옐로우NO.1</div><div class="meta">미션골드 · C등급</div><div class="price">5,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM26" data-name="W531 그리니쉬옐로우NO.1" data-price="5500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w536 비리디언 미션골드 c">
+<div class="ptext"><div class="name">W536 비리디언</div><div class="meta">미션골드 · C등급</div><div class="price">5,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM27" data-name="W536 비리디언" data-price="5500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w538 터쿼이즈블루 미션골드 b">
+<div class="ptext"><div class="name">W538 터쿼이즈블루</div><div class="meta">미션골드 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM28" data-name="W538 터쿼이즈블루" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w539 프러시안그린 미션골드 b">
+<div class="ptext"><div class="name">W539 프러시안그린</div><div class="meta">미션골드 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM29" data-name="W539 프러시안그린" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w569 로시에나 미션골드 a">
+<div class="ptext"><div class="name">W569 로시에나</div><div class="meta">미션골드 · A등급</div><div class="price">4,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM30" data-name="W569 로시에나" data-price="4000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w579 호라이즌블루 미션골드 b">
+<div class="ptext"><div class="name">W579 호라이즌블루</div><div class="meta">미션골드 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM31" data-name="W579 호라이즌블루" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w585 퍼머먼트크린 미션골드 b">
+<div class="ptext"><div class="name">W585 퍼머먼트크린</div><div class="meta">미션골드 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM32" data-name="W585 퍼머먼트크린" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w587 리프그린 미션골드 b">
+<div class="ptext"><div class="name">W587 리프그린</div><div class="meta">미션골드 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM33" data-name="W587 리프그린" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w590 코발트터쿼이즈휴 미션골드 e">
+<div class="ptext"><div class="name">W590 코발트터쿼이즈휴</div><div class="meta">미션골드 · E등급</div><div class="price">9,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM34" data-name="W590 코발트터쿼이즈휴" data-price="9000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w593 멜론그린 미션골드 a">
+<div class="ptext"><div class="name">W593 멜론그린</div><div class="meta">미션골드 · A등급</div><div class="price">4,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM35" data-name="W593 멜론그린" data-price="4000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w609 그리니쉬블루 미션골드 d">
+<div class="ptext"><div class="name">W609 그리니쉬블루</div><div class="meta">미션골드 · D등급</div><div class="price">7,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM36" data-name="W609 그리니쉬블루" data-price="7000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w611 바이올렛레이크 미션골드 e">
+<div class="ptext"><div class="name">W611 바이올렛레이크</div><div class="meta">미션골드 · E등급</div><div class="price">9,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DM37" data-name="W611 바이올렛레이크" data-price="9000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="987 페인즈그레이 swc b">
+<div class="ptext"><div class="name">987 페인즈그레이</div><div class="meta">SWC · B등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DXSWC10" data-name="987 페인즈그레이" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w337 피치블랙 홀베인 a">
+<div class="ptext"><div class="name">W337 피치블랙</div><div class="meta">홀베인 · A등급</div><div class="price">6,200원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX홀베인13" data-name="W337 피치블랙" data-price="6200" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w338 아이보리블랙 홀베인 a">
+<div class="ptext"><div class="name">W338 아이보리블랙</div><div class="meta">홀베인 · A등급</div><div class="price">6,200원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX홀베인14" data-name="W338 아이보리블랙" data-price="6200" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="w353 그레이오브그레이 홀베인 a">
+<div class="ptext"><div class="name">W353 그레이오브그레이</div><div class="meta">홀베인 · A등급</div><div class="price">6,200원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX홀베인15" data-name="W353 그레이오브그레이" data-price="6200" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="1 핑키오렌지no.1 조색 a">
+<div class="ptext"><div class="name">1 핑키오렌지NO.1</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색18" data-name="1 핑키오렌지NO.1" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="6 하이옐로우 조색 a">
+<div class="ptext"><div class="name">6 하이옐로우</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색19" data-name="6 하이옐로우" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="8 엔티크레몬no.1 조색 a">
+<div class="ptext"><div class="name">8 엔티크레몬NO.1</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색20" data-name="8 엔티크레몬NO.1" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="12 그레이오우커no.1 조색 a">
+<div class="ptext"><div class="name">12 그레이오우커NO.1</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색21" data-name="12 그레이오우커NO.1" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="17 핑키오페라no.1 조색 a">
+<div class="ptext"><div class="name">17 핑키오페라NO.1</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색22" data-name="17 핑키오페라NO.1" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="24 그레이바이올렛no.1 조색 a">
+<div class="ptext"><div class="name">24 그레이바이올렛NO.1</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색23" data-name="24 그레이바이올렛NO.1" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="29 그레이프러시안no.1 조색 a">
+<div class="ptext"><div class="name">29 그레이프러시안NO.1</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색24" data-name="29 그레이프러시안NO.1" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="31 그레이프러시안no.4 조색 a">
+<div class="ptext"><div class="name">31 그레이프러시안NO.4</div><div class="meta">조색 · A등급</div><div class="price">3,300원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="DX조색25" data-name="31 그레이프러시안NO.4" data-price="3300" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+</div></div>
+<div class="product-section ani-paints"><div class="list"><div class="prod allinone-card" data-name="애니 올인원 세트(박스포함) 애니 세트 ">
+<div class="ptext"><div class="name allinone">애니 올인원 세트(박스포함)</div><div class="meta">애니 세트</div><div class="price">160,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="ANI_SET_ALL" data-name="애니 올인원 세트(박스포함)" data-price="160000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div><div class="prod" data-name="1 옐로우 딥 애니 a컬러 a">
+<div class="ptext"><div class="name">1 옐로우 딥</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA111" data-name="1 옐로우 딥" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="13 번트시에나 애니 a컬러 a">
+<div class="ptext"><div class="name">13 번트시에나</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA115" data-name="13 번트시에나" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="27 피코크블루 애니 a컬러 a">
+<div class="ptext"><div class="name">27 피코크블루</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA119" data-name="27 피코크블루" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="2 옐로우 오렌지 애니 a컬러 a">
+<div class="ptext"><div class="name">2 옐로우 오렌지</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA121" data-name="2 옐로우 오렌지" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="14 라이트레드 애니 a컬러 a">
+<div class="ptext"><div class="name">14 라이트레드</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA125" data-name="14 라이트레드" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="28 워터블루 애니 a컬러 a">
+<div class="ptext"><div class="name">28 워터블루</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA129" data-name="28 워터블루" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="3 오렌지  애니 a컬러 a">
+<div class="ptext"><div class="name">3 오렌지 </div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA131" data-name="3 오렌지 " data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="15 번트엄버 애니 a컬러 a">
+<div class="ptext"><div class="name">15 번트엄버</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA135" data-name="15 번트엄버" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="30 프러시안블루 애니 a컬러 a">
+<div class="ptext"><div class="name">30 프러시안블루</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA139" data-name="30 프러시안블루" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="4 퍼피 레드 애니 a컬러 a">
+<div class="ptext"><div class="name">4 퍼피 레드</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA141" data-name="4 퍼피 레드" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="16 초콜렛 애니 a컬러 a">
+<div class="ptext"><div class="name">16 초콜렛</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA145" data-name="16 초콜렛" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="31 인디고 애니 a컬러 a">
+<div class="ptext"><div class="name">31 인디고</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA149" data-name="31 인디고" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="5 크림슨 레이크 애니 a컬러 a">
+<div class="ptext"><div class="name">5 크림슨 레이크</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA151" data-name="5 크림슨 레이크" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="17 세피아 애니 a컬러 a">
+<div class="ptext"><div class="name">17 세피아</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA155" data-name="17 세피아" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="32 코발트 그린 애니 a컬러 a">
+<div class="ptext"><div class="name">32 코발트 그린</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA159" data-name="32 코발트 그린" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="6 버밀리온(휴) 애니 a컬러 a">
+<div class="ptext"><div class="name">6 버밀리온(휴)</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA161" data-name="6 버밀리온(휴)" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="18 코랄레드 애니 a컬러 a">
+<div class="ptext"><div class="name">18 코랄레드</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA165" data-name="18 코랄레드" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="33 뉴트럴 틴트 애니 a컬러 a">
+<div class="ptext"><div class="name">33 뉴트럴 틴트</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA169" data-name="33 뉴트럴 틴트" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="7 핑키오렌지 no.3 애니 a컬러 a">
+<div class="ptext"><div class="name">7 핑키오렌지 no.3</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA171" data-name="7 핑키오렌지 no.3" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="19 린덴그린 애니 a컬러 a">
+<div class="ptext"><div class="name">19 린덴그린</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA175" data-name="19 린덴그린" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="34 핑키 모브 애니 a컬러 a">
+<div class="ptext"><div class="name">34 핑키 모브</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA179" data-name="34 핑키 모브" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="8 레드 핑크 애니 a컬러 a">
+<div class="ptext"><div class="name">8 레드 핑크</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA181" data-name="8 레드 핑크" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="20 그리니쉬 옐로우 애니 a컬러 a">
+<div class="ptext"><div class="name">20 그리니쉬 옐로우</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA185" data-name="20 그리니쉬 옐로우" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="35 마린오커 애니 a컬러 a">
+<div class="ptext"><div class="name">35 마린오커</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA189" data-name="35 마린오커" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="9 헬리오트로프 애니 a컬러 a">
+<div class="ptext"><div class="name">9 헬리오트로프</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA191" data-name="9 헬리오트로프" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="21 올리브 그린 애니 a컬러 a">
+<div class="ptext"><div class="name">21 올리브 그린</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA195" data-name="21 올리브 그린" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="38 시에나 모브 애니 a컬러 a">
+<div class="ptext"><div class="name">38 시에나 모브</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA199" data-name="38 시에나 모브" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="10 레드 바이올렛 애니 a컬러 a">
+<div class="ptext"><div class="name">10 레드 바이올렛</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA201" data-name="10 레드 바이올렛" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="22 샙그린 애니 a컬러 a">
+<div class="ptext"><div class="name">22 샙그린</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA205" data-name="22 샙그린" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="39 마린핑크 애니 a컬러 a">
+<div class="ptext"><div class="name">39 마린핑크</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA209" data-name="39 마린핑크" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="11 퍼머넌트 모브 애니 a컬러 a">
+<div class="ptext"><div class="name">11 퍼머넌트 모브</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA211" data-name="11 퍼머넌트 모브" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="23 후커스 그린 애니 a컬러 a">
+<div class="ptext"><div class="name">23 후커스 그린</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA215" data-name="23 후커스 그린" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="12 옐로우 오커 애니 a컬러 a">
+<div class="ptext"><div class="name">12 옐로우 오커</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA221" data-name="12 옐로우 오커" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="26 세루리안 블루 애니 a컬러 a">
+<div class="ptext"><div class="name">26 세루리안 블루</div><div class="meta">애니 A컬러 · A등급</div><div class="price">3,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AA225" data-name="26 세루리안 블루" data-price="3500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="25 미들그린 애니 b컬러 b">
+<div class="ptext"><div class="name">25 미들그린</div><div class="meta">애니 B컬러 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AB241" data-name="25 미들그린" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="29 울트라마린 애니 b컬러 b">
+<div class="ptext"><div class="name">29 울트라마린</div><div class="meta">애니 B컬러 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AB245" data-name="29 울트라마린" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="36 울트라그린 애니 b컬러 b">
+<div class="ptext"><div class="name">36 울트라그린</div><div class="meta">애니 B컬러 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AB249" data-name="36 울트라그린" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="40 미들블루 애니 b컬러 b">
+<div class="ptext"><div class="name">40 미들블루</div><div class="meta">애니 B컬러 · B등급</div><div class="price">4,500원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AB251" data-name="40 미들블루" data-price="4500" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="24 섀도우 그린 애니 c컬러 c">
+<div class="ptext"><div class="name">24 섀도우 그린</div><div class="meta">애니 C컬러 · C등급</div><div class="price">11,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AC271" data-name="24 섀도우 그린" data-price="11000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="37 페인즈 그레이 애니 c컬러 c">
+<div class="ptext"><div class="name">37 페인즈 그레이</div><div class="meta">애니 C컬러 · C등급</div><div class="price">11,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="AC275" data-name="37 페인즈 그레이" data-price="11000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="a컬러 34색 전체 애니 세트 a">
+<div class="ptext"><div class="name">A컬러 34색 전체</div><div class="meta">애니 세트 · A등급</div><div class="price">119,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="ANI_SET_A" data-name="A컬러 34색 전체" data-price="119000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="b컬러 4색 전체 애니 세트 b">
+<div class="ptext"><div class="name">B컬러 4색 전체</div><div class="meta">애니 세트 · B등급</div><div class="price">18,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="ANI_SET_B" data-name="B컬러 4색 전체" data-price="18000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+<div class="prod" data-name="c컬러 2색 전체 애니 세트 c">
+<div class="ptext"><div class="name">C컬러 2색 전체</div><div class="meta">애니 세트 · C등급</div><div class="price">22,000원</div></div>
+<label class="qtylabel"><span>수량</span><select aria-label="종류 또는 수량 선택" class="qtyselect" data-id="ANI_SET_C" data-name="C컬러 2색 전체" data-price="22000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+</div>
+</div></div>
+</section>
+<section class="card" id="orderCheck"><div class="step">4. 주문 확인</div><div class="muted" id="summaryText">수량을 선택하면 주문금액이 자동 계산됩니다.</div><div class="receipt" id="receipt"><div class="muted">선택한 품목이 없습니다.</div></div><div class="summary"><span>총 결제금액</span><strong id="total">0원</strong></div><div class="notice"><b>입금 계좌</b>　우리 1002-365-011083 / 김우영<br/>입금 후 관리자 확인이 완료되면 발주가 진행됩니다.</div><div class="notice strong">⚠️ 입금 확인이 되지 않은 주문은 발주되지 않습니다.<br/>주문 완료 후 수정·취소는 불가하며, 취소가 필요한 경우 인포에 직접 문의해 주세요.</div><button class="primary" id="reviewBtn" type="button">주문 내용 최종 확인</button></section>
+
+</main></div>
+
+<section id="completeView" aria-live="polite">
+  <div class="complete-hero">
+    <div class="complete-icon">✓</div>
+    <h2>주문완료</h2>
+    <p><b>주문이 정상적으로 완료되었습니다.</b><br>배송일까지 <b>3~5일 정도 소요</b>될 수 있으니 참고 부탁드립니다.</p>
+  </div>
+
+  <div class="complete-card">
+    <div class="complete-title">주문 정보</div>
+    <div class="complete-info">
+      <div><small>주문번호</small><b id="doneOrderNo">-</b></div>
+      <div><small>주문일</small><b id="doneDate">-</b></div>
+      <div><small>주문반</small><b id="doneMajor">-</b></div>
+      <div><small>반 / 이름</small><b id="doneStudent">-</b></div>
+      <div><small>휴대폰번호</small><b id="donePhone">-</b></div>
+      <div><small>결제상태</small><b>입금대기</b></div>
+    </div>
+  </div>
+
+  <div class="complete-card">
+    <div class="complete-title">주문내역</div>
+    <div class="order-table-wrap">
+      <table class="order-table">
+        <thead><tr><th class="num">번호</th><th>상품명</th><th>종류</th><th class="num">수량</th><th class="money">금액</th></tr></thead>
+        <tbody id="doneRows"></tbody>
+      </table>
+    </div>
+    <div class="complete-total"><span>총 결제금액</span><strong id="doneTotal">0원</strong></div>
+    <div class="complete-note">⚠️ 입금 확인이 되지 않은 주문은 발주되지 않습니다.<br>주문 완료 후 수정·취소는 홈페이지에서 불가하며, 취소가 필요한 경우 인포에 직접 문의해 주세요.</div>
+  </div>
+</section>
+
+<script>
+
+function won(n){return Number(n||0).toLocaleString('ko-KR')+'원'}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function getVariant(id){var el=document.querySelector('[data-for="'+id+'"]');if(!el)return '';return (el.value||'').trim()}
+function updateOrder(){
+  var qtys=document.querySelectorAll('.qtyselect'), total=0, rows=[], count=0;
+  for(var i=0;i<qtys.length;i++){
+    var q=parseInt(qtys[i].value||'0',10)||0;
+    if(q>0){
+      var p=parseInt(qtys[i].getAttribute('data-price')||'0',10)||0;
+      var id=qtys[i].getAttribute('data-id')||'';
+      var name=qtys[i].getAttribute('data-name')||'';
+      var variant=getVariant(id);
+      var suffix=variant?' · '+variant:'';
+      total+=p*q; count+=q;
+      rows.push('<div class="rrow"><span>'+esc(name+suffix)+' × '+q+'</span><b>'+won(p*q)+'</b></div>');
+    }
+  }
+  var totalEl=document.getElementById('total'), receipt=document.getElementById('receipt'), st=document.getElementById('summaryText');
+  if(totalEl) totalEl.textContent=won(total);
+  if(receipt) receipt.innerHTML=rows.length?rows.join(''):'<div class="muted">선택한 품목이 없습니다.</div>';
+  if(st) st.textContent=rows.length?'선택 품목 '+rows.length+'종 · 총 수량 '+count+'개':'수량을 선택하면 주문금액이 자동 계산됩니다.';
+}
+function validateVariants(){
+  var qtys=document.querySelectorAll('.qtyselect');
+  for(var i=0;i<qtys.length;i++){
+    var q=parseInt(qtys[i].value||'0',10)||0;
+    if(q>0){var id=qtys[i].getAttribute('data-id');var v=document.querySelector('[data-for="'+id+'"]');if(v&&!String(v.value||'').trim()){v.focus();alert(qtys[i].getAttribute('data-name')+'의 종류를 선택해 주세요.');return false}}
+  }
+  return true;
+}
+
+function getOrderRows(){
+  var qtys=document.querySelectorAll('.qtyselect'), rows=[], total=0;
+  for(var i=0;i<qtys.length;i++){
+    var q=parseInt(qtys[i].value||'0',10)||0;
+    if(q>0){
+      var p=parseInt(qtys[i].getAttribute('data-price')||'0',10)||0;
+      var id=qtys[i].getAttribute('data-id')||'';
+      var name=qtys[i].getAttribute('data-name')||'';
+      var variant=getVariant(id);
+      rows.push({name:name,variant:variant||'-',qty:q,amount:p*q});
+      total+=p*q;
+    }
+  }
+  return {rows:rows,total:total};
+}
+function formatNow(){
+  var d=new Date();
+  function z(n){return String(n).padStart(2,'0')}
+  return d.getFullYear()+'.'+z(d.getMonth()+1)+'.'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());
+}
+function makeOrderNo(){
+  var d=new Date();
+  function z(n){return String(n).padStart(2,'0')}
+  var date=String(d.getFullYear()).slice(-2)+z(d.getMonth()+1)+z(d.getDate());
+  var rand=String(Math.floor(Math.random()*9000)+1000);
+  return 'M'+date+'-'+rand;
+}
+function showCompleteScreen(){
+  var data=getOrderRows();
+  var cls=document.getElementById('className').value;
+  var nm=document.getElementById('studentName').value.trim();
+  var ph=document.getElementById('phone').value.trim();
+  var major=document.getElementById('majorAni').checked?'애니반':'디자인반';
+  var body=document.getElementById('doneRows');
+  var html='';
+  for(var i=0;i<data.rows.length;i++){
+    var r=data.rows[i];
+    html+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.variant)+'</td><td class="num">'+r.qty+'</td><td class="money">'+won(r.amount)+'</td></tr>';
+  }
+  body.innerHTML=html;
+  document.getElementById('doneOrderNo').textContent=makeOrderNo();
+  document.getElementById('doneDate').textContent=formatNow();
+  document.getElementById('doneMajor').textContent=major;
+  document.getElementById('doneStudent').textContent=cls+'반 / '+nm;
+  document.getElementById('donePhone').textContent=ph;
+  document.getElementById('doneTotal').textContent=won(data.total);
+  document.querySelector('.shell').style.display='none';
+  document.getElementById('completeView').style.display='block';
+  window.scrollTo(0,0);
+}
+
+(function(){
+  var qtys=document.querySelectorAll('.qtyselect');
+  for(var i=0;i<qtys.length;i++){qtys[i].addEventListener('change',updateOrder);qtys[i].addEventListener('input',updateOrder)}
+  var variants=document.querySelectorAll('.variantselect,.variantinput');
+  for(i=0;i<variants.length;i++){variants[i].addEventListener('change',updateOrder);variants[i].addEventListener('input',updateOrder)}
+  var search=document.getElementById('search');
+  if(search)search.addEventListener('input',function(){var q=this.value.trim().toLowerCase(),ps=document.querySelectorAll('.product-section .prod');for(var j=0;j<ps.length;j++){var n=(ps[j].getAttribute('data-name')||'').toLowerCase();ps[j].style.display=(!q||n.indexOf(q)>=0)?'grid':'none'}});
+  var phone=document.getElementById('phone');
+  if(phone)phone.addEventListener('input',function(){var d=this.value.replace(/\D/g,'').slice(0,11);this.value=d.length<=3?d:d.length<=7?d.slice(0,3)+'-'+d.slice(3):d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7)});
+  var btn=document.getElementById('reviewBtn');
+  if(btn)btn.addEventListener('click',function(){
+    var cls=document.getElementById('className').value,nm=document.getElementById('studentName').value.trim(),ph=document.getElementById('phone').value.replace(/\D/g,'');
+    if(!cls)return alert('반명을 선택해 주세요.');if(!nm)return alert('학생 이름을 입력해 주세요.');if(ph.length<10)return alert('휴대폰번호를 확인해 주세요.');
+    var any=false;for(var j=0;j<qtys.length;j++){if((parseInt(qtys[j].value||'0',10)||0)>0){any=true;break}}if(!any)return alert('주문할 품목의 수량을 선택해 주세요.');
+    if(!validateVariants())return;updateOrder();showCompleteScreen();
+  });
+  updateOrder();
+})();
+</script>
+
+<script>
+(function(){
+  function refreshOrderMobileSafe(){
+    var qtys=document.querySelectorAll('.qtyselect');
+    var rows=[], total=0, totalQty=0;
+    for(var i=0;i<qtys.length;i++){
+      var el=qtys[i];
+      var q=parseInt(el.value||'0',10)||0;
+      if(q<=0) continue;
+      var price=parseInt(el.getAttribute('data-price')||'0',10)||0;
+      var id=el.getAttribute('data-id')||'';
+      var name=el.getAttribute('data-name')||'';
+      var variant='';
+      var opt=document.querySelector('[data-variant-for="'+id+'"]');
+      if(opt){
+        variant=(opt.value||'').trim();
+      } else {
+        var txt=document.querySelector('[data-variant-input-for="'+id+'"]');
+        if(txt) variant=(txt.value||'').trim();
+      }
+      rows.push({name:name,variant:variant,qty:q,amount:price*q});
+      total += price*q;
+      totalQty += q;
+    }
+
+    var list=document.getElementById('orderList');
+    if(list){
+      if(!rows.length){
+        list.innerHTML='<div class="empty">선택한 품목이 없습니다.</div>';
+      }else{
+        var h='';
+        for(var j=0;j<rows.length;j++){
+          var r=rows[j];
+          h+='<div class="orderline"><span>'+esc(r.name)+(r.variant?' · '+esc(r.variant):'')+' × '+r.qty+'</span><b>'+won(r.amount)+'</b></div>';
+        }
+        list.innerHTML=h;
+      }
+    }
+    var totalEl=document.getElementById('total');
+    if(totalEl) totalEl.textContent=won(total);
+    var countEl=document.getElementById('countText');
+    if(countEl) countEl.textContent='선택 품목 '+rows.length+'종 · 총 수량 '+totalQty+'개';
+
+    // Keep completion helper in sync.
+    window.__hi5CurrentOrder={rows:rows,total:total,totalQty:totalQty};
+  }
+
+  function bind(){
+    var qtys=document.querySelectorAll('.qtyselect');
+    for(var i=0;i<qtys.length;i++){
+      qtys[i].onchange=refreshOrderMobileSafe;
+      qtys[i].oninput=refreshOrderMobileSafe;
+      qtys[i].onclick=function(){ setTimeout(refreshOrderMobileSafe,0); };
+    }
+    var variants=document.querySelectorAll('[data-variant-for],[data-variant-input-for]');
+    for(var j=0;j<variants.length;j++){
+      variants[j].onchange=refreshOrderMobileSafe;
+      variants[j].oninput=refreshOrderMobileSafe;
+    }
+    refreshOrderMobileSafe();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bind);
+  }else{
+    bind();
+  }
+
+  // Override completion screen to use the already synchronized mobile-safe order.
+  var originalShow=window.showCompleteScreen;
+  window.showCompleteScreen=function(){
+    refreshOrderMobileSafe();
+    var data=window.__hi5CurrentOrder||{rows:[],total:0};
+    if(!data.rows.length){
+      alert('주문 수량을 1개 이상 선택해 주세요.');
+      return;
+    }
+    var cls=document.getElementById('className').value;
+    var nm=document.getElementById('studentName').value.trim();
+    var ph=document.getElementById('phone').value.trim();
+    var major=document.getElementById('majorAni').checked?'애니반':'디자인반';
+    var body=document.getElementById('doneRows');
+    var h='';
+    for(var i=0;i<data.rows.length;i++){
+      var r=data.rows[i];
+      h+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.variant||'-')+'</td><td class="num">'+r.qty+'</td><td class="money">'+won(r.amount)+'</td></tr>';
+    }
+    body.innerHTML=h;
+    document.getElementById('doneOrderNo').textContent=makeOrderNo();
+    document.getElementById('doneDate').textContent=formatNow();
+    document.getElementById('doneMajor').textContent=major;
+    document.getElementById('doneStudent').textContent=cls+'반 / '+nm;
+    document.getElementById('donePhone').textContent=ph;
+    document.getElementById('doneTotal').textContent=won(data.total);
+    document.querySelector('.shell').style.display='none';
+    document.getElementById('completeView').style.display='block';
+    window.scrollTo(0,0);
+  };
+})();
+</script>
+
+
+<script>
+(function(){
+  var lastSignature = '';
+  function mobilePoll(){
+    try{
+      var els=document.getElementsByClassName('qtyselect');
+      var sig='';
+      for(var i=0;i<els.length;i++){ sig += (els[i].value||'0') + ','; }
+      var vs=document.getElementsByClassName('variantselect');
+      for(var j=0;j<vs.length;j++){ sig += (vs[j].value||'') + ','; }
+      if(sig!==lastSignature){
+        lastSignature=sig;
+        if(typeof refreshOrderMobileSafe==='function'){ refreshOrderMobileSafe(); }
+        else if(typeof updateOrder==='function'){ updateOrder(); }
+      }
+    }catch(e){}
+    setTimeout(mobilePoll,300);
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){setTimeout(mobilePoll,300);});
+  }else{
+    setTimeout(mobilePoll,300);
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  var oldValidate=window.validateVariants;
+  window.validateVariants=function(){
+    var qtys=document.getElementsByClassName('qtyselect');
+    for(var i=0;i<qtys.length;i++){
+      var q=parseInt(qtys[i].value||'0',10)||0;
+      if(q<=0) continue;
+      var id=qtys[i].getAttribute('data-id')||'';
+      var v=document.querySelector('[data-variant-for="'+id+'"]');
+      if(v && !String(v.value||'').trim()){
+        alert('종류를 먼저 선택해 주세요.');
+        try{v.focus();}catch(e){}
+        return false;
+      }
+    }
+    return oldValidate ? oldValidate() : true;
+  };
+})();
+</script>
+
+
+<script>
+(function(){
+  function esc2(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+  function won2(n){return Number(n||0).toLocaleString('ko-KR')+'원';}
+  function variantFor(id){var el=document.querySelector('[data-for="'+id+'"],[data-variant-for="'+id+'"],[data-variant-input-for="'+id+'"]');return el?String(el.value||'').trim():'';}
+  window.recalcOrder=function(){
+    var qs=document.querySelectorAll('.qtyselect'),rows=[],total=0,qtyTotal=0;
+    for(var i=0;i<qs.length;i++){var q=parseInt(qs[i].value||'0',10)||0;if(q<1)continue;var id=qs[i].getAttribute('data-id')||'';var name=qs[i].getAttribute('data-name')||'품목';var price=parseInt(qs[i].getAttribute('data-price')||'0',10)||0;var variant=variantFor(id);rows.push({id:id,name:name,variant:variant,qty:q,amount:price*q});total+=price*q;qtyTotal+=q;}
+    var list=document.getElementById('orderList');if(list){if(!rows.length){list.innerHTML='<div class="empty">선택한 품목이 없습니다.</div>';}else{var h='';for(var j=0;j<rows.length;j++){var r=rows[j];h+='<div class="orderline"><span>'+esc2(r.name)+(r.variant?' · '+esc2(r.variant):'')+' × '+r.qty+'</span><b>'+won2(r.amount)+'</b></div>';}list.innerHTML=h;}}
+    var t=document.getElementById('total');if(t)t.textContent=won2(total);var c=document.getElementById('countText');if(c)c.textContent='선택 품목 '+rows.length+'종 · 총 수량 '+qtyTotal+'개';window.__hi5_order={rows:rows,total:total,qtyTotal:qtyTotal};return window.__hi5_order;
+  };
+  function bind(){document.addEventListener('change',function(e){if(e.target&&(e.target.classList.contains('qtyselect')||e.target.classList.contains('variantselect')))window.recalcOrder();},true);document.addEventListener('input',function(e){if(e.target&&(e.target.classList.contains('qtyselect')||e.target.classList.contains('variantselect')))window.recalcOrder();},true);window.recalcOrder();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
+  setTimeout(function(){var b=document.getElementById('finalBtn');if(b)b.addEventListener('click',function(){window.recalcOrder();},true);},0);
+})();
+</script>
+
+</body></html>
