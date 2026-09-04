@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<title>HI5 재료주문</title>
+<title>HI5 재료주문 모바일 v11</title>
 <style>
 :root{--ink:#172033;--muted:#737b8c;--line:#e4e8ef;--brand:#d85659;--soft:#fff1f1;--bg:#f7f8fb;--warn:#fff7df;--warnline:#efcf73}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",Arial,sans-serif}button,input,select{font:inherit}main{max-width:720px;margin:auto;padding:14px 12px 38px}.head{padding:8px 2px 14px}.head h1{margin:0;font-size:24px}.head p{margin:5px 0 0;color:var(--muted);font-size:13px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin-bottom:13px}.step{font-size:18px;font-weight:900;margin-bottom:12px}
@@ -61,11 +61,6 @@
   .complete-info div:nth-last-child(-n+2){border-bottom:1px solid #e4e8ef}
   .complete-info div:last-child{border-bottom:0}
 }
-</style>
-
-
-<style>
-html,body{max-width:100%;overflow-x:hidden}input,select,button,textarea{font-size:16px}select,button,input{min-height:44px}@media(max-width:600px){.shell{width:100%!important;max-width:100%!important;margin:0!important}.prod{min-width:0}.order-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
 </style>
 
 </head>
@@ -985,19 +980,78 @@ function showCompleteScreen(){
 
 
 <script>
+// HI5 Supabase order save integration
 (function(){
-  function esc2(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
-  function won2(n){return Number(n||0).toLocaleString('ko-KR')+'원';}
-  function variantFor(id){var el=document.querySelector('[data-for="'+id+'"],[data-variant-for="'+id+'"],[data-variant-input-for="'+id+'"]');return el?String(el.value||'').trim():'';}
-  window.recalcOrder=function(){
-    var qs=document.querySelectorAll('.qtyselect'),rows=[],total=0,qtyTotal=0;
-    for(var i=0;i<qs.length;i++){var q=parseInt(qs[i].value||'0',10)||0;if(q<1)continue;var id=qs[i].getAttribute('data-id')||'';var name=qs[i].getAttribute('data-name')||'품목';var price=parseInt(qs[i].getAttribute('data-price')||'0',10)||0;var variant=variantFor(id);rows.push({id:id,name:name,variant:variant,qty:q,amount:price*q});total+=price*q;qtyTotal+=q;}
-    var list=document.getElementById('orderList');if(list){if(!rows.length){list.innerHTML='<div class="empty">선택한 품목이 없습니다.</div>';}else{var h='';for(var j=0;j<rows.length;j++){var r=rows[j];h+='<div class="orderline"><span>'+esc2(r.name)+(r.variant?' · '+esc2(r.variant):'')+' × '+r.qty+'</span><b>'+won2(r.amount)+'</b></div>';}list.innerHTML=h;}}
-    var t=document.getElementById('total');if(t)t.textContent=won2(total);var c=document.getElementById('countText');if(c)c.textContent='선택 품목 '+rows.length+'종 · 총 수량 '+qtyTotal+'개';window.__hi5_order={rows:rows,total:total,qtyTotal:qtyTotal};return window.__hi5_order;
+  var SUPABASE_URL='https://hcacnnlpkrupkmkicjzz.supabase.co';
+  var SUPABASE_KEY='sb_publishable_gfG2nriEU9lt9atvVJTqgA_YZjk_NAV';
+
+  async function saveOrderToSupabase(orderNo, data, major, cls, nm, ph){
+    var payload={
+      order_no: orderNo,
+      major: major,
+      class_name: cls,
+      student_name: nm,
+      phone: ph,
+      items: JSON.stringify(data.rows),
+      total_amount: data.total,
+      payment_status: '입금대기',
+      order_status: '발주대기',
+      delivery_status: '배부대기'
+    };
+    var res=await fetch(SUPABASE_URL+'/rest/v1/orders',{
+      method:'POST',
+      headers:{
+        'apikey':SUPABASE_KEY,
+        'Authorization':'Bearer '+SUPABASE_KEY,
+        'Content-Type':'application/json',
+        'Prefer':'return=minimal'
+      },
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok){
+      var msg=await res.text();
+      throw new Error(msg||('HTTP '+res.status));
+    }
+  }
+
+  window.showCompleteScreen=async function(){
+    var data=(window.__hi5CurrentOrder&&window.__hi5CurrentOrder.rows&&window.__hi5CurrentOrder.rows.length)
+      ? window.__hi5CurrentOrder : getOrderRows();
+    if(!data.rows.length){ alert('주문 수량을 1개 이상 선택해 주세요.'); return; }
+
+    var cls=document.getElementById('className').value;
+    var nm=document.getElementById('studentName').value.trim();
+    var ph=document.getElementById('phone').value.trim();
+    var major=document.getElementById('majorAni').checked?'애니반':'디자인반';
+    var orderNo=makeOrderNo();
+    var btn=document.getElementById('reviewBtn');
+    if(btn){btn.disabled=true;btn.textContent='주문 저장 중...';}
+
+    try{
+      await saveOrderToSupabase(orderNo,data,major,cls,nm,ph);
+    }catch(e){
+      console.error(e);
+      alert('주문 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.\n계속 오류가 나면 인포에 문의해 주세요.');
+      if(btn){btn.disabled=false;btn.textContent='주문 내용 최종 확인';}
+      return;
+    }
+
+    var body=document.getElementById('doneRows'), h='';
+    for(var i=0;i<data.rows.length;i++){
+      var r=data.rows[i];
+      h+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.variant||'-')+'</td><td class="num">'+r.qty+'</td><td class="money">'+won(r.amount)+'</td></tr>';
+    }
+    body.innerHTML=h;
+    document.getElementById('doneOrderNo').textContent=orderNo;
+    document.getElementById('doneDate').textContent=formatNow();
+    document.getElementById('doneMajor').textContent=major;
+    document.getElementById('doneStudent').textContent=cls+'반 / '+nm;
+    document.getElementById('donePhone').textContent=ph;
+    document.getElementById('doneTotal').textContent=won(data.total);
+    document.querySelector('.shell').style.display='none';
+    document.getElementById('completeView').style.display='block';
+    window.scrollTo(0,0);
   };
-  function bind(){document.addEventListener('change',function(e){if(e.target&&(e.target.classList.contains('qtyselect')||e.target.classList.contains('variantselect')))window.recalcOrder();},true);document.addEventListener('input',function(e){if(e.target&&(e.target.classList.contains('qtyselect')||e.target.classList.contains('variantselect')))window.recalcOrder();},true);window.recalcOrder();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind);else bind();
-  setTimeout(function(){var b=document.getElementById('finalBtn');if(b)b.addEventListener('click',function(){window.recalcOrder();},true);},0);
 })();
 </script>
 
