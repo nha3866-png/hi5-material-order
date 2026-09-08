@@ -135,138 +135,7 @@
 </style>
 
 
-<style id="payment-confirm-final-style">
-.payment-account-highlight{
-  margin:12px 0;
-  padding:15px 14px;
-  border:2px solid #ef6b6f;
-  border-radius:14px;
-  background:#fff3f3;
-  box-shadow:0 0 0 3px rgba(239,107,111,.07);
-}
-.payment-account-label{
-  color:#c94348;
-  font-size:13px;
-  font-weight:950;
-  margin-bottom:6px;
-}
-.payment-account-number{
-  color:#172033;
-  font-size:19px;
-  line-height:1.35;
-  font-weight:950;
-  letter-spacing:.1px;
-  word-break:keep-all;
-}
-.payment-account-help{
-  margin-top:7px;
-  color:#b2464a;
-  font-size:12px;
-  font-weight:850;
-  line-height:1.5;
-}
-#paymentConfirmModal{
-  position:fixed;
-  inset:0;
-  z-index:100000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  background:rgba(12,18,30,.55);
-}
-#paymentConfirmModal.show{display:flex}
-.payment-confirm-card{
-  width:min(430px,100%);
-  border-radius:20px;
-  background:#fff;
-  padding:22px 18px 18px;
-  box-shadow:0 22px 70px rgba(0,0,0,.25);
-}
-.payment-confirm-icon{
-  width:54px;height:54px;
-  display:grid;place-items:center;
-  margin:0 auto 12px;
-  border-radius:50%;
-  background:#fff0f0;
-  color:#d85659;
-  font-size:28px;
-  font-weight:950;
-}
-.payment-confirm-card h3{
-  margin:0 0 7px;
-  text-align:center;
-  font-size:21px;
-}
-.payment-confirm-desc{
-  margin:0 0 14px;
-  color:#687286;
-  text-align:center;
-  font-size:13px;
-  line-height:1.55;
-}
-.payment-confirm-account{
-  padding:14px;
-  border:2px solid #ef6b6f;
-  border-radius:14px;
-  background:#fff4f4;
-  text-align:center;
-}
-.payment-confirm-account small{
-  display:block;
-  margin-bottom:5px;
-  color:#b2464a;
-  font-weight:900;
-  font-size:11px;
-}
-.payment-confirm-account strong{
-  display:block;
-  color:#172033;
-  font-size:18px;
-  font-weight:950;
-}
-.payment-confirm-warning{
-  margin:10px 0 14px;
-  padding:11px 12px;
-  border:1px solid #f0c4c6;
-  border-radius:11px;
-  background:#fff8f8;
-  color:#b13f44;
-  font-size:13px;
-  font-weight:900;
-  line-height:1.5;
-}
-.payment-confirm-question{
-  margin-bottom:14px;
-  text-align:center;
-  font-size:16px;
-  font-weight:950;
-}
-.payment-confirm-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
-}
-.payment-confirm-actions button{
-  min-height:48px;
-  border-radius:12px;
-  font-size:15px;
-  font-weight:950;
-}
-#paymentNoBtn{
-  border:1px solid #d8dee8;
-  background:#fff;
-  color:#4f596b;
-}
-#paymentYesBtn{
-  border:0;
-  background:#172033;
-  color:#fff;
-}
-@media(max-width:480px){
-  .payment-account-number{font-size:17px}
-}
-</style>
+
 
 
 <style id="order-guide-style">
@@ -294,6 +163,53 @@
 .order-guide-list strong{color:#c94348;font-weight:950}
 </style>
 
+
+<style id="payment-confirm-mobile-final-style">
+.payment-account-highlight{
+  margin:12px 0;padding:15px 14px;border:2px solid #ef6b6f;border-radius:14px;
+  background:#fff3f3;box-shadow:0 0 0 3px rgba(239,107,111,.07);
+}
+.payment-account-label{color:#c94348;font-size:13px;font-weight:950;margin-bottom:6px}
+.payment-account-number{color:#172033;font-size:19px;font-weight:950;line-height:1.35}
+.payment-account-owner{margin-top:3px;color:#172033;font-size:14px;font-weight:900}
+.payment-account-help{margin-top:8px;color:#b2464a;font-size:12px;font-weight:900;line-height:1.5}
+#paymentConfirmModal{
+  position:fixed;inset:0;z-index:999999;display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(12,18,30,.58);
+}
+#paymentConfirmModal.show{display:flex!important}
+.payment-confirm-card{
+  width:min(430px,100%);background:#fff;border-radius:20px;padding:22px 18px 18px;
+  box-shadow:0 22px 70px rgba(0,0,0,.26);
+}
+.payment-confirm-icon{
+  width:54px;height:54px;display:grid;place-items:center;margin:0 auto 12px;border-radius:50%;
+  background:#fff0f0;color:#d85659;font-size:28px;font-weight:950;
+}
+.payment-confirm-card h3{margin:0 0 8px;text-align:center;font-size:21px}
+.payment-confirm-desc{margin:0 0 14px;color:#687286;text-align:center;font-size:13px;line-height:1.55}
+.payment-confirm-account{
+  padding:14px;border:2px solid #ef6b6f;border-radius:14px;background:#fff4f4;text-align:center;
+}
+.payment-confirm-account small{display:block;margin-bottom:5px;color:#b2464a;font-size:11px;font-weight:900}
+.payment-confirm-account strong{display:block;color:#172033;font-size:18px;font-weight:950}
+.payment-confirm-account span{display:block;margin-top:4px;color:#172033;font-size:13px;font-weight:900}
+.payment-confirm-warning{
+  margin:10px 0 14px;padding:11px 12px;border:1px solid #f0c4c6;border-radius:11px;
+  background:#fff8f8;color:#b13f44;font-size:13px;font-weight:900;line-height:1.5;
+}
+.payment-confirm-question{margin-bottom:14px;text-align:center;font-size:16px;font-weight:950}
+.payment-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.payment-confirm-actions button{min-height:50px;border-radius:12px;font-size:15px;font-weight:950}
+#paymentNoBtn{border:1px solid #d8dee8;background:#fff;color:#4f596b}
+#paymentYesBtn{border:0;background:#172033;color:#fff}
+@media(max-width:480px){
+  .payment-confirm-card{padding:20px 15px 15px}
+  .payment-confirm-account strong{font-size:17px}
+  .payment-account-number{font-size:17px}
+}
+</style>
+
 </head>
 <body>
 <input checked="" class="ctrl" id="majorDesign" name="major" type="radio"/>
@@ -314,6 +230,7 @@
     <li><strong>현금영수증 또는 카드결제를 원할 경우</strong> 시중 화방에서 직접 구입해 주세요.</li>
     <li>목록에 없는 재료는 판매하지 않습니다.</li>
     <li>재료 주문은 <strong>선불 결제</strong>이며, 입금 확인 후 발주됩니다.</li>
+    <li><strong>주문 후 배송 안내:</strong> 재료 및 물감은 휴일이 겹칠 경우 <strong>7~10일 정도 소요될 수 있으니</strong>, 급하게 필요한 재료는 근처 화방에서 구입해 주세요.</li>
   </ul>
 </div>
 
@@ -758,8 +675,14 @@
 <div class="paint-picked"><div class="paint-picked-empty">선택한 색상이 없습니다.</div></div>
 </div></div></div>
 </section>
-<section class="card" id="orderCheck"><div class="step">4. 주문 확인</div><div class="muted" id="summaryText">수량을 선택하면 주문금액이 자동 계산됩니다.</div><div class="receipt" id="receipt"><div class="muted">선택한 품목이 없습니다.</div></div><div class="summary"><span>총 결제금액</span><strong id="total">0원</strong></div><div class="payment-account-highlight">
+<section class="card" id="orderCheck"><div class="step">4. 주문 확인</div><div class="muted" id="summaryText">수량을 선택하면 주문금액이 자동 계산됩니다.</div><div class="receipt" id="receipt"><div class="muted">선택한 품목이 없습니다.</div></div><div class="summary"><span>총 결제금액</span><strong id="total">0원</strong></div>
+<div class="payment-account-highlight">
   <div class="payment-account-label">💳 입금 계좌</div>
+  <div class="payment-account-number">우리은행 1002-365-011083</div>
+  <div class="payment-account-owner">예금주 : 김우영</div>
+  <div class="payment-account-help">입금 확인이 되지 않은 주문은 발주되지 않습니다.</div>
+</div>
+
   <div class="payment-account-number">우리 1002-365-011083 / 김우영</div>
   <div class="payment-account-help">입금 후 관리자 확인이 완료되어야 발주가 진행됩니다.</div>
 </div><div class="notice strong">⚠️ 입금 확인이 되지 않은 주문은 발주되지 않습니다.<br/>주문 완료 후 수정·취소는 불가하며, 취소가 필요한 경우 인포에 직접 문의해 주세요.</div><button class="primary" id="reviewBtn" type="button">주문 내용 최종 확인</button></section>
@@ -1490,14 +1413,16 @@ function showCompleteScreen(){
 </script>
 
 
+
 <div id="paymentConfirmModal" role="dialog" aria-modal="true" aria-labelledby="paymentConfirmTitle">
   <div class="payment-confirm-card">
     <div class="payment-confirm-icon">!</div>
     <h3 id="paymentConfirmTitle">입금 확인</h3>
-    <div class="payment-confirm-desc">주문 완료 전 입금 여부를 한 번 더 확인해 주세요.</div>
+    <div class="payment-confirm-desc">주문을 완료하기 전에 입금 여부를 확인해 주세요.</div>
     <div class="payment-confirm-account">
       <small>입금 계좌</small>
-      <strong>우리 1002-365-011083 / 김우영</strong>
+      <strong>우리은행 1002-365-011083</strong>
+      <span>예금주 : 김우영</span>
     </div>
     <div class="payment-confirm-warning">⚠️ 입금 확인이 되지 않은 주문은 발주되지 않습니다.</div>
     <div class="payment-confirm-question">입금을 완료하셨나요?</div>
@@ -1509,62 +1434,66 @@ function showCompleteScreen(){
 </div>
 
 
-<script id="payment-confirm-final-runtime">
+<script id="payment-confirm-mobile-final-runtime">
 (function(){
-  var actualComplete = window.showCompleteScreen;
+  function bindPaymentConfirmation(){
+    if(window.__hi5PaymentConfirmBound) return;
+    window.__hi5PaymentConfirmBound = true;
 
-  function openModal(){
-    var m=document.getElementById('paymentConfirmModal');
-    if(m)m.classList.add('show');
-  }
-  function closeModal(){
-    var m=document.getElementById('paymentConfirmModal');
-    if(m)m.classList.remove('show');
-  }
+    var realComplete = window.showCompleteScreen;
+    if(typeof realComplete !== 'function'){
+      console.warn('showCompleteScreen 함수를 찾지 못했습니다.');
+      return;
+    }
 
-  window.showCompleteScreen = function(){
-    openModal();
-  };
+    var modal = document.getElementById('paymentConfirmModal');
+    var yes = document.getElementById('paymentYesBtn');
+    var no = document.getElementById('paymentNoBtn');
 
-  function bind(){
-    var yes=document.getElementById('paymentYesBtn');
-    var no=document.getElementById('paymentNoBtn');
-    var modal=document.getElementById('paymentConfirmModal');
+    function openModal(){ if(modal) modal.classList.add('show'); }
+    function closeModal(){ if(modal) modal.classList.remove('show'); }
+
+    window.showCompleteScreen = function(){
+      openModal();
+    };
 
     if(no){
-      no.addEventListener('click',function(){
+      no.onclick = function(){
         closeModal();
-      });
+      };
     }
 
     if(yes){
-      yes.addEventListener('click',async function(){
+      yes.onclick = async function(){
+        yes.disabled = true;
+        var oldText = yes.textContent;
+        yes.textContent = '주문 저장 중...';
         closeModal();
-        yes.disabled=true;
-        var old=yes.textContent;
-        yes.textContent='주문 저장 중...';
         try{
-          if(typeof actualComplete==='function'){
-            await actualComplete();
-          }
+          await realComplete();
+        }catch(e){
+          console.error(e);
+          alert('주문 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
         }finally{
-          yes.disabled=false;
-          yes.textContent=old;
+          yes.disabled = false;
+          yes.textContent = oldText;
         }
-      });
+      };
     }
 
     if(modal){
       modal.addEventListener('click',function(e){
-        if(e.target===modal)closeModal();
+        if(e.target === modal) closeModal();
       });
     }
   }
 
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',bind);
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded',function(){
+      setTimeout(bindPaymentConfirmation,0);
+    });
   }else{
-    bind();
+    setTimeout(bindPaymentConfirmation,0);
   }
 })();
 </script>
