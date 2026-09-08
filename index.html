@@ -223,6 +223,23 @@
 }
 </style>
 
+
+<style id="student-products-db-style">
+.products-db-status{
+  margin:8px 0 0;
+  padding:8px 11px;
+  border-radius:10px;
+  background:#eef7f1;
+  color:#2c7350;
+  font-size:11px;
+  font-weight:800;
+  display:none;
+}
+.products-db-status.loading{display:block;background:#fff8e8;color:#9a6a00}
+.products-db-status.ok{display:block;background:#eef7f1;color:#2c7350}
+.products-db-status.error{display:block;background:#fff1f1;color:#b34c4c}
+</style>
+
 </head>
 <body>
 <input checked="" class="ctrl" id="majorDesign" name="major" type="radio"/>
@@ -247,7 +264,7 @@
   </ul>
 </div>
 
-<section class="card"><div class="step">3. 품목 선택</div><div class="tabs"><label class="sheet-material" for="sheetMaterial">미술재료</label><label class="sheet-paint" for="sheetPaint">물감재료</label></div><input class="search" id="search" placeholder="품목명을 검색하세요"/>
+<section class="card"><div class="step">3. 품목 선택</div><div class="tabs"><label class="sheet-material" for="sheetMaterial">미술재료</label><label class="sheet-paint" for="sheetPaint">물감재료</label></div><input class="search" id="search" placeholder="품목명을 검색하세요"/><div id="productsDbStatus" class="products-db-status loading">최신 재료표를 불러오는 중입니다.</div>
 <div class="product-section materials"><div class="list"><div class="prod" data-name="포스터칼라 화이트(250ml) - 신한 EA">
 <div class="ptext"><div class="name">포스터칼라 화이트(250ml) - 신한</div><div class="meta">EA</div><div class="price">12,000원</div></div>
 <label class="qtylabel"><span>수량</span><select aria-label="수량 선택" class="qtyselect" data-id="M01" data-name="포스터칼라 화이트(250ml) - 신한" data-price="12000" onchange="updateOrder()"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
@@ -1547,3 +1564,234 @@ function showCompleteScreen(){
  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addSections); else addSections();
 })();
 </script>
+
+<script id="student-products-db-runtime">
+(function(){
+  var PRODUCTS_URL='https://hcacnnlpkrupkmkicjzz.supabase.co';
+  var PRODUCTS_KEY='sb_publishable_gfG2nriEU9lt9atvVJTqgA_YZjk_NAV';
+
+  function status(msg,type){
+    var el=document.getElementById('productsDbStatus');
+    if(!el)return;
+    el.textContent=msg;
+    el.className='products-db-status '+(type||'');
+  }
+  function escHtml(v){
+    return String(v==null?'':v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function price(n){
+    return Number(n||0).toLocaleString('ko-KR')+'원';
+  }
+  function qtyOptions(startZero){
+    var s=startZero?'<option value="0">0</option>':'';
+    for(var i=startZero?1:1;i<=10;i++)s+='<option value="'+i+'">'+i+'</option>';
+    return s;
+  }
+  function materialCodeFromCard(card){
+    var q=card.querySelector('.qtyselect');
+    if(!q)return '';
+    var id=String(q.getAttribute('data-id')||'');
+    if(/^M13_/.test(id))return 'material_artliner';
+    if(/^M\d+/.test(id))return 'material_'+id.replace(/_.*/,'');
+    return '';
+  }
+  function patchMaterialCard(card,p){
+    card.style.display='';
+    card.setAttribute('data-name',p.name+' '+(Array.isArray(p.options)?p.options.join(' '):''));
+
+    var name=card.querySelector('.name');
+    var priceEl=card.querySelector('.price');
+    if(name)name.textContent=p.name;
+    if(priceEl)priceEl.textContent=price(p.sale_price);
+
+    card.querySelectorAll('.qtyselect').forEach(function(q){
+      q.setAttribute('data-name',p.name);
+      q.setAttribute('data-price',String(Number(p.sale_price||0)));
+    });
+
+    // DB에 옵션이 있는 품목은 종류 선택 항목도 DB 기준으로 갱신.
+    if(Array.isArray(p.options) && p.options.length){
+      card.querySelectorAll('.variantselect').forEach(function(sel){
+        var first=sel.options.length ? (sel.options[0].textContent||'종류 선택') : '종류 선택';
+        sel.innerHTML='<option value="">'+escHtml(first)+'</option>'+
+          p.options.map(function(op){return '<option value="'+escHtml(op)+'">'+escHtml(op)+'</option>';}).join('');
+      });
+    }
+  }
+  function newMaterialCard(p){
+    var list=document.querySelector('.product-section.materials .list');
+    if(!list)return;
+
+    var id=String(p.product_code||('material_new_'+Date.now())).replace(/^material_/,'');
+    var opts=Array.isArray(p.options)?p.options:[];
+    var variant=opts.length
+      ? '<div class="variantwrap"><select aria-label="종류 선택" class="variantselect" data-for="'+escHtml(id)+'" onchange="updateOrder()">'+
+          '<option value="">종류 선택</option>'+opts.map(function(op){return '<option value="'+escHtml(op)+'">'+escHtml(op)+'</option>';}).join('')+
+        '</select></div>'
+      : '';
+
+    var meta=opts.length?'종류 선택 <span class="req">필수</span>':'EA';
+    var html=
+      '<div class="prod'+(opts.length?' hasvariant':'')+'" data-db-created="1" data-name="'+escHtml(p.name+' '+opts.join(' '))+'">'+
+        '<div class="ptext">'+
+          '<div class="name">'+escHtml(p.name)+'</div>'+
+          '<div class="meta">'+meta+'</div>'+
+          '<div class="price">'+price(p.sale_price)+'</div>'+
+          variant+
+        '</div>'+
+        '<label class="qtylabel"><span>수량</span>'+
+          '<select aria-label="수량 선택" class="qtyselect" data-id="'+escHtml(id)+'" data-name="'+escHtml(p.name)+'" data-price="'+Number(p.sale_price||0)+'" onchange="updateOrder()">'+
+            qtyOptions(true)+
+          '</select>'+
+        '</label>'+
+      '</div>';
+    list.insertAdjacentHTML('beforeend',html);
+  }
+
+  function paintSection(category){
+    return document.querySelector(category==='design'
+      ? '.product-section.design-paints .list'
+      : '.product-section.ani-paints .list');
+  }
+  function normalize(v){return String(v||'').trim().replace(/\s+/g,' ');}
+  function findPaintCard(p){
+    var list=paintSection(p.category);
+    if(!list)return null;
+    var wanted=[normalize(p.name),normalize(p.group_name)].filter(Boolean);
+    var cards=Array.from(list.querySelectorAll('.paint-group'));
+    return cards.find(function(card){
+      var vals=[
+        normalize(card.getAttribute('data-group-label')),
+        normalize(card.querySelector('.paint-group-title')&&card.querySelector('.paint-group-title').textContent)
+      ];
+      return wanted.some(function(w){return vals.indexOf(w)>=0;});
+    })||null;
+  }
+  function patchPaintCard(card,p){
+    var opts=Array.isArray(p.options)?p.options:[];
+    card.style.display='';
+    card.setAttribute('data-db-active','1');
+    card.setAttribute('data-paint-group',String(p.product_code));
+    card.setAttribute('data-group-label',p.group_name||p.name);
+    card.setAttribute('data-group-price',String(Number(p.sale_price||0)));
+    card.setAttribute('data-name',p.name+' '+opts.join(' '));
+
+    var title=card.querySelector('.paint-group-title');
+    var priceEl=card.querySelector('.paint-group-price');
+    var sel=card.querySelector('.paint-color');
+    if(title)title.textContent=p.name;
+    if(priceEl)priceEl.textContent=price(p.sale_price);
+    if(sel){
+      sel.innerHTML='<option value="">색상 선택</option>'+
+        opts.map(function(op){return '<option value="'+escHtml(op)+'">'+escHtml(op)+'</option>';}).join('');
+    }
+    var picked=card.querySelector('.paint-picked');
+    if(picked)picked.innerHTML='<div class="paint-picked-empty">선택한 색상이 없습니다.</div>';
+  }
+  function newPaintCard(p){
+    var list=paintSection(p.category);
+    if(!list)return;
+    var opts=Array.isArray(p.options)?p.options:[];
+    var html=
+      '<div class="prod paint-group" data-db-created="1" data-db-active="1" '+
+        'data-group-label="'+escHtml(p.group_name||p.name)+'" '+
+        'data-group-price="'+Number(p.sale_price||0)+'" '+
+        'data-name="'+escHtml(p.name+' '+opts.join(' '))+'" '+
+        'data-paint-group="'+escHtml(p.product_code)+'">'+
+        '<div class="paint-group-head"><div>'+
+          '<div class="paint-group-title">'+escHtml(p.name)+'</div>'+
+          '<div class="paint-group-sub">색상별 추가 또는 아래 \'모두 추가\'로 전체 색상을 한 번에 담을 수 있습니다.</div>'+
+        '</div><div class="paint-group-price">'+price(p.sale_price)+'</div></div>'+
+        '<div class="paint-group-controls">'+
+          '<select class="paint-color"><option value="">색상 선택</option>'+
+            opts.map(function(op){return '<option value="'+escHtml(op)+'">'+escHtml(op)+'</option>';}).join('')+
+          '</select>'+
+          '<select class="paint-add-qty">'+qtyOptions(false)+'</select>'+
+          '<button class="paint-add-btn" type="button">추가</button>'+
+        '</div>'+
+        '<button class="paint-add-all-btn" type="button">모두 추가</button>'+
+        '<div class="paint-picked"><div class="paint-picked-empty">선택한 색상이 없습니다.</div></div>'+
+      '</div>';
+    list.insertAdjacentHTML('beforeend',html);
+  }
+
+  function applyProducts(rows){
+    // DB가 기준이므로 기존 일반품목/물감그룹은 일단 숨기고,
+    // DB에서 active로 내려온 품목만 다시 표시한다.
+    document.querySelectorAll('.product-section.materials .prod').forEach(function(card){
+      card.style.display='none';
+    });
+    document.querySelectorAll('.product-section.design-paints .paint-group, .product-section.ani-paints .paint-group').forEach(function(card){
+      card.style.display='none';
+      card.removeAttribute('data-db-active');
+    });
+
+    // DB에 없는 올인원 세트는 기존 고정 상품으로 유지.
+    document.querySelectorAll('.allinone-card').forEach(function(card){
+      card.style.display='';
+    });
+
+    var materialCards={};
+    document.querySelectorAll('.product-section.materials .prod').forEach(function(card){
+      var code=materialCodeFromCard(card);
+      if(code && !materialCards[code])materialCards[code]=card;
+    });
+
+    rows.forEach(function(p){
+      if(p.category==='material'){
+        var card=materialCards[String(p.product_code)];
+        if(card)patchMaterialCard(card,p);
+        else newMaterialCard(p);
+      }else if(p.category==='design' || p.category==='ani'){
+        var pc=findPaintCard(p);
+        if(pc)patchPaintCard(pc,p);
+        else newPaintCard(p);
+      }
+    });
+
+    // DB 반영 전 남아있던 물감 선택 상태는 초기화.
+    if(window.__paintGroups)window.__paintGroups={};
+
+    // 검색/주문합계 등 기존 로직을 새 DOM에 맞춰 즉시 갱신.
+    if(typeof window.updateOrder==='function')window.updateOrder();
+  }
+
+  async function loadProducts(){
+    status('최신 재료표를 불러오는 중입니다.','loading');
+    try{
+      var res=await fetch(PRODUCTS_URL+'/rest/v1/products?select=product_code,category,name,group_name,sale_price,active,options,display_order&active=eq.true&order=display_order.asc,id.asc',{
+        headers:{
+          'apikey':PRODUCTS_KEY,
+          'Authorization':'Bearer '+PRODUCTS_KEY
+        },
+        cache:'no-store'
+      });
+      if(!res.ok)throw new Error(await res.text());
+      var rows=await res.json();
+      if(!Array.isArray(rows) || !rows.length)throw new Error('등록된 판매 품목이 없습니다.');
+      applyProducts(rows);
+      status('최신 재료표가 반영되었습니다. · '+rows.length+'개','ok');
+      setTimeout(function(){
+        var el=document.getElementById('productsDbStatus');
+        if(el)el.style.display='none';
+      },1800);
+    }catch(e){
+      console.error('products load failed',e);
+      // 장애 시 기존 HTML 품목표로 주문할 수 있게 fallback.
+      document.querySelectorAll('.product-section .prod').forEach(function(card){
+        card.style.display='';
+      });
+      status('최신 재료표 연결이 지연되고 있습니다. 기존 재료표를 표시합니다.','error');
+    }
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){setTimeout(loadProducts,30);});
+  }else{
+    setTimeout(loadProducts,30);
+  }
+})();
+</script>
+
