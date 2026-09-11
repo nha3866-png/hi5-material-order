@@ -1357,6 +1357,31 @@ function showCompleteScreen(){
     });
     if(!res.ok)throw new Error(await res.text());
   }
+
+  async function sendOrderReceivedAlimtalk(nos){
+    var orderNos=[];
+    if(nos.material)orderNos.push(nos.material);
+    if(nos.paint)orderNos.push(nos.paint);
+    if(!orderNos.length)return {ok:false,error:'주문번호 없음'};
+
+    var res=await fetch(SUPABASE_URL+'/functions/v1/send-order-received',{
+      method:'POST',
+      headers:{
+        'apikey':SUPABASE_KEY,
+        'Authorization':'Bearer '+SUPABASE_KEY,
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({orderNos:orderNos})
+    });
+
+    var text=await res.text();
+    var result;
+    try{result=JSON.parse(text)}catch(e){result={ok:false,error:text||('HTTP '+res.status)}}
+    if(!res.ok || !result || result.ok!==true){
+      throw new Error((result&&result.error)?JSON.stringify(result.error):('HTTP '+res.status));
+    }
+    return result;
+  }
   function doneTable(rows){
     return '<div class="order-table-wrap"><table class="order-table"><thead><tr>'+
       '<th class="num">번호</th><th>상품명</th><th>종류</th><th class="num">수량</th><th class="money">금액</th>'+
@@ -1415,6 +1440,16 @@ function showCompleteScreen(){
       if(data.material.rows.length)jobs.push(saveOne('material',nos.material,data.material));
       if(data.paint.rows.length)jobs.push(saveOne('paint',nos.paint,data.paint));
       await Promise.all(jobs);
+
+      // 주문 저장이 모두 끝난 뒤 접수완료 알림톡을 한 번만 발송한다.
+      // 알림톡 실패가 주문 저장 자체를 취소하지 않도록 별도로 처리한다.
+      try{
+        await sendOrderReceivedAlimtalk(nos);
+      }catch(talkErr){
+        console.error('주문접수 알림톡 발송 실패:',talkErr);
+        window.__lastOrderAlimtalkError=talkErr;
+      }
+
       renderSplitComplete(data,nos);
     }catch(e){
       console.error(e);
